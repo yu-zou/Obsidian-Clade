@@ -41,6 +41,21 @@ After installing, configure Clade in Obsidian Settings → Clade:
 | Reconnect Base Delay | Initial delay between retries (ms) | 1000 |
 | Sessions Directory | Where to store conversation history | `.clade/sessions` |
 
+## Logs and Debugging
+
+Clade stores logs in your vault at `.clade/logs/clade.log`. These logs include:
+- Agent connection status and errors
+- Message sending and receiving
+- Context attachment events
+- OpenCode process output
+
+**Log features:**
+- Automatic rotation at 5MB
+- View recent logs via the "View Logs" button when connection fails
+- Logs persist across Obsidian restarts
+
+If you encounter issues, check the log file or open Obsidian's developer console (Ctrl/Cmd+Shift+I) for additional debugging information.
+
 ## Usage
 
 ### Opening the Chat
