@@ -18,7 +18,7 @@ Clade brings AI-assisted writing and editing directly into Obsidian. It uses a s
 
 1. Install the [BRAT](https://obsidian.md/plugins?id=obsidian42-brat) plugin from Obsidian's community plugins
 2. Open BRAT settings → Beta Plugins → Add Beta Plugin
-3. Enter the GitHub repository URL: `https://github.com/yourusername/clade`
+3. Enter the GitHub repository URL: `https://github.com/yu-zou/Obsidian-Clade`
 4. Click "Add Plugin"
 5. Enable Clade in Obsidian's settings → Community plugins
 
