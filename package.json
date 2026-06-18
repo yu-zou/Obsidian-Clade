@@ -1,0 +1,24 @@
+{
+  "name": "obsidian-clade",
+  "version": "0.1.0",
+  "description": "AI-native research plugin for Obsidian using OpenCode agent",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "node esbuild.config.mjs production",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@codemirror/state": "^6.4.0",
+    "@codemirror/view": "^6.26.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "esbuild": "^0.24.0",
+    "obsidian": "^1.7.0",
+    "typescript": "^5.5.0",
+    "vitest": "^1.6.0"
+  }
+}

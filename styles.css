@@ -1,0 +1,414 @@
+/* === Chat Container === */
+.clade-chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  font-size: 14px;
+}
+
+/* === Header === */
+.clade-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  flex-shrink: 0;
+}
+
+.clade-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.clade-status-dot.connected { background-color: var(--color-green); box-shadow: 0 0 4px var(--color-green); }
+.clade-status-dot.connecting { background-color: var(--color-orange); animation: clade-pulse 1s ease-in-out infinite; }
+.clade-status-dot.disconnected { background-color: var(--color-red); }
+.clade-status-dot.failed { background-color: var(--color-red); border: 1px solid var(--color-red); }
+
+@keyframes clade-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.clade-session-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.clade-session-title:hover { background-color: var(--background-modifier-hover); }
+
+/* === Messages === */
+.clade-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.clade-message {
+  max-width: 90%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  word-wrap: break-word;
+}
+
+.clade-message-user {
+  align-self: flex-end;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+}
+
+.clade-message-assistant {
+  align-self: flex-start;
+  background-color: var(--background-primary-alt);
+  color: var(--text-normal);
+}
+
+.clade-message-system {
+  align-self: center;
+  background-color: transparent;
+  color: var(--text-muted);
+  font-style: italic;
+  font-size: 13px;
+}
+
+.clade-message-content {
+  white-space: pre-wrap;
+}
+
+/* === Tool Call Rows === */
+.clade-tool-call-row {
+  align-self: stretch;
+  padding: 4px 8px;
+  background-color: var(--background-secondary);
+  border-radius: 4px;
+  margin: 2px 0;
+}
+
+.clade-tool-call-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.clade-tool-call-icon { font-size: 14px; }
+
+.clade-tool-call-summary {
+  flex: 1;
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: var(--font-monospace);
+}
+
+.clade-tool-call-toggle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 4px;
+}
+
+.clade-tool-call-details {
+  margin-top: 4px;
+  padding: 8px;
+  background-color: var(--background-primary);
+  border-radius: 4px;
+  font-family: var(--font-monospace);
+  font-size: 11px;
+  white-space: pre-wrap;
+  overflow-x: auto;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.clade-tool-call-details.hidden { display: none; }
+
+/* === Input Container === */
+.clade-input-container {
+  display: flex;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid var(--background-modifier-border);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.clade-chat-input {
+  flex: 1;
+  resize: none;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+  line-height: 1.5;
+}
+
+.clade-chat-input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+.clade-send-btn {
+  align-self: flex-end;
+  padding: 6px 14px;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.clade-send-btn:hover { opacity: 0.85; }
+
+/* === Context Chips === */
+.clade-context-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 4px 12px 0;
+  flex-shrink: 0;
+}
+
+.clade-context-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 12px;
+  font-size: 11px;
+}
+
+.clade-context-chip-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 11px;
+  padding: 0;
+  line-height: 1;
+}
+
+.clade-context-chip-close:hover { color: var(--text-normal); }
+
+/* === File Picker === */
+.clade-file-picker {
+  position: absolute;
+  max-height: 200px;
+  overflow-y: auto;
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.clade-file-picker.hidden { display: none; }
+
+.clade-file-picker-item {
+  padding: 6px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--background-modifier-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.clade-file-picker-item:last-child { border-bottom: none; }
+.clade-file-picker-item:hover { background-color: var(--background-modifier-hover); }
+.clade-file-picker-item.active-file { background-color: var(--background-secondary); }
+
+.clade-file-picker-badge {
+  font-size: 10px;
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  padding: 1px 5px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+
+.clade-file-picker-name {
+  font-size: 12px;
+  font-family: var(--font-monospace);
+  color: var(--text-muted);
+}
+
+.clade-file-picker-empty {
+  padding: 12px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* === Session List === */
+.clade-session-list {
+  position: absolute;
+  top: 40px;
+  left: 12px;
+  right: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+}
+
+.clade-session-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--background-modifier-border);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.clade-session-new-btn {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border: none;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.clade-session-list-item {
+  padding: 8px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--background-modifier-border);
+}
+
+.clade-session-list-item:hover { background-color: var(--background-modifier-hover); }
+.clade-session-list-item:last-child { border-bottom: none; }
+.clade-session-list-name { font-size: 13px; font-weight: 500; }
+
+.clade-session-list-date {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* === Banner === */
+.clade-banner {
+  align-self: stretch;
+  padding: 10px 12px;
+  background-color: var(--background-modifier-error);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.clade-banner-actions {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.clade-banner-actions button {
+  padding: 4px 10px;
+  border: 1px solid var(--text-muted);
+  border-radius: 4px;
+  background: none;
+  color: var(--text-normal);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.clade-banner-actions button:hover { background-color: var(--background-modifier-hover); }
+
+/* === Diff Decorations (CodeMirror 6) === */
+.cm-clade-hunk-pending { background-color: var(--background-modifier-hover); }
+.cm-clade-hunk-accepted { background-color: rgba(0, 200, 0, 0.1); }
+.cm-clade-hunk-rejected { background-color: rgba(255, 0, 0, 0.08); text-decoration: line-through; }
+.cm-clade-hunk-revised { background-color: rgba(0, 100, 255, 0.08); }
+
+.clade-hunk-actions {
+  display: inline-flex;
+  gap: 2px;
+  margin: 0 8px;
+  font-size: 11px;
+  vertical-align: middle;
+}
+
+.clade-hunk-actions button {
+  padding: 0 4px;
+  font-size: 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 3px;
+  background: var(--background-primary);
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.clade-hunk-actions .clade-accept-btn:hover {
+  background-color: var(--color-green);
+  color: var(--text-on-accent);
+  border-color: var(--color-green);
+}
+
+.clade-hunk-actions .clade-reject-btn:hover {
+  background-color: var(--color-red);
+  color: var(--text-on-accent);
+  border-color: var(--color-red);
+}
+
+.clade-hunk-actions .clade-revise-btn:hover {
+  background-color: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+/* === Revise Popover === */
+.clade-revise-popover {
+  position: absolute;
+  z-index: 1001;
+  background-color: var(--background-primary);
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  padding: 8px;
+  min-width: 250px;
+}
+
+.clade-revise-popover input {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  font-size: 13px;
+  background-color: var(--background-primary);
+  color: var(--text-normal);
+}
+
+.clade-revise-popover input:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}

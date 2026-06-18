@@ -1,0 +1,9 @@
+{
+  "id": "clade",
+  "name": "Clade",
+  "version": "0.1.0",
+  "minAppVersion": "1.0.0",
+  "description": "AI-native research plugin powered by OpenCode agent",
+  "author": "",
+  "isDesktopOnly": true
+}
