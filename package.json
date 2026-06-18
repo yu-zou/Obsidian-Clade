@@ -1,6 +1,6 @@
 {
   "name": "obsidian-clade",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "AI-native research plugin for Obsidian using OpenCode agent",
   "main": "main.js",
   "scripts": {
