@@ -1,4 +1,4 @@
-import { App, Plugin, PluginManifest, WorkspaceLeaf } from 'obsidian';
+import { App, Plugin, PluginManifest, WorkspaceLeaf, Notice } from 'obsidian';
 import {
   CladeSettings, DEFAULT_SETTINGS,
   LifecycleEvent, AcpClientEvent, AcpToolCall,
@@ -10,6 +10,7 @@ import { ACPClient } from './acp-client';
 import { SessionStore } from './session-store';
 import { DiffEngine } from './diff-engine';
 import { DiffView } from './diff-view';
+import { Logger } from './logger';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -21,6 +22,7 @@ export default class CladePlugin extends Plugin {
   private sessionStore!: SessionStore;
   private diffEngine!: DiffEngine;
   private diffView!: DiffView;
+  private logger!: Logger;
   private vaultPath: string;
 
   constructor(app: App, manifest: PluginManifest) {
@@ -31,6 +33,10 @@ export default class CladePlugin extends Plugin {
   async onload(): Promise<void> {
     await this.loadSettings();
     this.addSettingTab(new CladeSettingTab(this.app, this));
+
+    // Initialize logger
+    this.logger = new Logger(this.vaultPath);
+    this.logger.info('Clade plugin loading...');
 
     // Initialize session store
     this.sessionStore = new SessionStore(path.join(this.vaultPath, this.settings.sessionsDir));
@@ -71,6 +77,7 @@ export default class CladePlugin extends Plugin {
   }
 
   async onunload(): Promise<void> {
+    this.logger.info('Clade plugin unloading...');
     if (this.lifecycle) this.lifecycle.dispose();
     this.app.workspace.detachLeavesOfType(CLADE_VIEW_TYPE);
   }
@@ -102,6 +109,8 @@ export default class CladePlugin extends Plugin {
   // --- Agent lifecycle ---
 
   private startAgent(): void {
+    this.logger.info('Starting OpenCode agent...');
+    
     this.lifecycle = new LifecycleManager({
       binPath: this.settings.opencodeBinaryPath,
       envVars: this.settings.envVars,
@@ -113,22 +122,26 @@ export default class CladePlugin extends Plugin {
 
     // Handle lifecycle events
     this.lifecycle.on('status', (event: LifecycleEvent) => {
+      this.logger.info(`Agent status: ${event.status}`, event);
+      
       if (!this.view) return;
       this.view.setStatus(event.status);
 
       if (event.status === 'failed') {
+        this.logger.error('Agent connection failed', event.error);
         this.view.showBanner('Clade could not connect to OpenCode.', [
           { label: 'Restart', callback: () => this.restartAgent() },
-          { label: 'View Logs', callback: () => console.log('View logs placeholder') },
+          { label: 'View Logs', callback: () => this.showLogs() },
         ]);
       }
     });
 
     this.lifecycle.on('log', (data: { level: string; data: string }) => {
-      console.log('[Clade agent stderr]', data.data);
+      this.logger.info(`[OpenCode stderr] ${data.data}`);
     });
 
     // Spawn the process
+    this.logger.info(`Spawning process: ${this.settings.opencodeBinaryPath} acp`);
     const handle = this.lifecycle.spawn();
 
     // Create ACP client
@@ -232,9 +245,12 @@ export default class CladePlugin extends Plugin {
   async sendMessage(text: string): Promise<void> {
     if (!this.acpClient) return;
 
+    this.logger.info('Sending message to agent', { textLength: text.length });
+
     let session = this.sessionStore.getCurrent();
     if (!session) {
       session = await this.sessionStore.create();
+      this.logger.info('Created new session', { sessionId: session.id });
     }
 
     // Auto-title from first user message
@@ -246,7 +262,12 @@ export default class CladePlugin extends Plugin {
 
     // Attach context files
     if (this.view) {
-      for (const ctx of this.view.getAttachedContext()) {
+      const context = this.view.getAttachedContext();
+      if (context.length > 0) {
+        this.logger.info('Attaching context', { contextCount: context.length });
+      }
+      
+      for (const ctx of context) {
         if (ctx.type === 'file') {
           const fullPath = path.join(this.vaultPath, ctx.path);
           try {
@@ -258,7 +279,7 @@ export default class CladePlugin extends Plugin {
               content,
             });
           } catch {
-            // File not found
+            this.logger.warn('Failed to attach file context', { path: ctx.path });
           }
         } else if (ctx.type === 'selection') {
           await this.acpClient.attachResource({
@@ -328,7 +349,13 @@ export default class CladePlugin extends Plugin {
   }
 
   restartAgent(): void {
+    this.logger.info('Restarting agent...');
     if (this.lifecycle) this.lifecycle.dispose();
     this.startAgent();
+  }
+
+  showLogs(): void {
+    const logs = this.logger.getRecentLogs(200);
+    new Notice(`Log file: ${this.logger.getLogPath()}\n\n${logs}`, 10000);
   }
 }
