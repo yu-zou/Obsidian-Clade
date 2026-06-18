@@ -4,60 +4,30 @@ An AI-native research notetaking plugin for Obsidian, powered by OpenCode.
 
 ## Overview
 
-Clade brings AI-assisted writing and editing directly into Obsidian using a **thin client / fat agent** architecture. The plugin handles context management and UI, while delegating all LLM orchestration to OpenCode via the Agent Client Protocol (ACP).
+Clade brings AI-assisted writing and editing directly into Obsidian. It uses a side panel chat interface where you can interact with OpenCode to help with research, writing, and note-taking tasks.
 
 **Key features:**
 - Persistent side panel chat with streaming responses
 - Context attachment via `@file` mentions and text selection
 - Inline diff rendering with per-hunk Accept/Reject/Revise actions
 - Conversation history persisted across Obsidian restarts
-- Automatic reconnection with exponential backoff
-
-## Architecture
-
-```
-┌─────────────────────────────────────┐
-│          Obsidian Plugin            │
-│  ┌──────────┐     ┌─────────────┐  │
-│  │ Chat UI  │────▶│ Diff Engine │  │
-│  └────┬─────┘     └─────────────┘  │
-│       │                             │
-│  ┌────▼──────────────────────────┐  │
-│  │       Session Store           │  │
-│  └───────────────────────────────┘  │
-└──────────────┬──────────────────────┘
-               │ JSON-RPC (stdio)
-        ┌──────▼──────┐
-        │  OpenCode   │
-        │  (ACP)      │
-        └─────────────┘
-```
-
-- **LifecycleManager**: Spawns and monitors the OpenCode process
-- **ACPClient**: Handles JSON-RPC communication over stdio
-- **SessionStore**: Persists conversations to disk (JSON)
-- **DiffEngine**: Parses and applies code diffs
-- **DiffView**: Renders diffs in the editor using CodeMirror 6
-- **ChatView**: Sidebar UI with streaming messages and tool call display
 
 ## Installation
 
-### From Source
+### Using BRAT (Recommended)
 
-```bash
-git clone https://github.com/yourusername/clade.git
-cd clade
-npm install
-npm run build
-```
+1. Install the [BRAT](https://obsidian.md/plugins?id=obsidian42-brat) plugin from Obsidian's community plugins
+2. Open BRAT settings → Beta Plugins → Add Beta Plugin
+3. Enter the GitHub repository URL: `https://github.com/yourusername/clade`
+4. Click "Add Plugin"
+5. Enable Clade in Obsidian's settings → Community plugins
 
-Then copy `main.js`, `manifest.json`, and `styles.css` to your vault's `.obsidian/plugins/clade/` directory.
+### Manual Installation
 
-### Requirements
-
-- Obsidian 1.7.0+
-- Node.js 18+ (for development)
-- OpenCode installed and accessible in PATH
+1. Download `main.js`, `manifest.json`, and `styles.css` from the repository
+2. Create a `clade` folder in your vault's `.obsidian/plugins/` directory
+3. Copy the three files into the `clade` folder
+4. Enable Clade in Obsidian's settings → Community plugins
 
 ## Configuration
 
@@ -93,7 +63,7 @@ When OpenCode proposes edits, Clade renders them as inline diffs in the editor:
 - **✗ Reject**: Discard the change
 - **✎ Revise**: Open a popover to provide feedback (e.g., "make it more concise")
 
-Changes are written directly to disk, bypassing Obsidian's virtual file system to ensure consistency between the editor, plugin, and agent.
+Changes are written directly to disk, ensuring consistency between the editor, plugin, and agent.
 
 ### Managing Sessions
 
@@ -102,54 +72,7 @@ Click the session title in the chat header to open the session switcher. From th
 - Create a new session
 - Right-click to rename a session
 
-## Development
+## Requirements
 
-### Setup
-
-```bash
-npm install
-```
-
-### Build
-
-```bash
-# Development build (watches for changes)
-npm run dev
-
-# Production build
-npm run build
-```
-
-### Test
-
-```bash
-npm test
-```
-
-### Project Structure
-
-```
-src/
-  main.ts           # Plugin entry point
-  types.ts          # Shared type definitions
-  lifecycle.ts      # Process management
-  acp-client.ts     # ACP protocol client
-  session-store.ts  # Conversation persistence
-  diff-engine.ts    # Diff parsing and application
-  diff-view.ts      # CM6 integration
-  chat-view.ts      # Chat UI
-  settings.ts       # Settings tab
-tests/
-  *.test.ts         # Unit tests
-```
-
-## Backlog
-
-- Multi-session support (concurrent chat threads)
-- Progress reporting for long-running tool calls
-- Cancellation tokens (user aborts generation mid-stream)
-- Settings changes mid-session handling
-
-## License
-
-MIT
+- Obsidian 1.7.0+
+- [OpenCode](https://github.com/opencode-ai/opencode) installed and accessible in PATH
