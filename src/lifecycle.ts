@@ -24,6 +24,7 @@ export class LifecycleManager {
   private reconnectAttempt = 0;
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private disposed = false;
+  private lastError: string | undefined;
 
   constructor(config: LifecycleConfig) {
     this.config = config;
@@ -59,10 +60,13 @@ export class LifecycleManager {
       if (this.disposed) return;
 
       const wasClean = code === 0 && !signal;
+      const errorMsg = code ? `Process exited with code ${code}` :
+               signal ? `Process killed with signal ${signal}` : undefined;
+      if (errorMsg) this.lastError = errorMsg;
+      
       this.emit('status', {
         status: 'disconnected',
-        error: code ? `Process exited with code ${code}` :
-               signal ? `Process killed with signal ${signal}` : undefined,
+        error: errorMsg,
       });
 
       if (!wasClean) {
@@ -72,9 +76,11 @@ export class LifecycleManager {
 
     this.process.on('error', (err) => {
       if (this.disposed) return;
+      const errorMsg = `Process error: ${err.message}`;
+      this.lastError = errorMsg;
       this.emit('status', {
         status: 'disconnected',
-        error: `Process error: ${err.message}`,
+        error: errorMsg,
       });
       this.scheduleReconnect();
     });
@@ -109,7 +115,11 @@ export class LifecycleManager {
     if (!rc) return;
 
     if (this.reconnectAttempt >= rc.maxAttempts) {
-      this.emit('status', { status: 'failed', attempt: this.reconnectAttempt });
+      this.emit('status', { 
+        status: 'failed', 
+        attempt: this.reconnectAttempt,
+        error: this.lastError,
+      });
       return;
     }
 
