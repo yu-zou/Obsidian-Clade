@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  obsidian:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: clade-e2e-obsidian
+    environment:
+      - DISPLAY=:99
+      - SCREEN_WIDTH=1280
+      - SCREEN_HEIGHT=720
+      - SCREEN_DEPTH=24
+    volumes:
+      # Mount vault for persistence
+      - ./vault:/workspace/vault
+      # Mount plugin assets
+      - ./assets:/workspace/assets:ro
+      # Mount scripts
+      - ./scripts:/workspace/scripts:ro
+    ports:
+      # VNC port for debugging (optional)
+      - "5900:5900"
+    shm_size: '2gb'
+    command: /workspace/scripts/start.sh
+    
+  # Test runner service (optional, can run tests from host)
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: clade-e2e-test-runner
+    depends_on:
+      - obsidian
+    volumes:
+      - ./vault:/workspace/vault
+      - ./scripts:/workspace/scripts:ro
+    network_mode: "service:obsidian"
+    command: /workspace/scripts/test.sh
+    profiles:
+      - test
