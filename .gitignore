@@ -5,3 +5,6 @@ coverage/
 # E2E test artifacts
 e2e/vault/
 e2e/assets/
+
+# Plugin data (user configuration)
+data.json

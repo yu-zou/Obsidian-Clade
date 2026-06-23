@@ -1,4 +1,4 @@
-import { spawn as cpSpawn, ChildProcess } from 'child_process';
+import { spawn as cpSpawn, spawnSync, ChildProcess } from 'child_process';
 import { LifecycleEvent, EventHandler } from './types';
 
 export interface LifecycleConfig {
@@ -39,7 +39,9 @@ export class LifecycleManager {
   spawn(): LifecycleHandle {
     this.emit('status', { status: 'connecting', attempt: this.reconnectAttempt });
 
-    this.process = cpSpawn(this.config.binPath, this.config.args || ['acp'], {
+    const resolvedPath = this.resolveBinaryPath(this.config.binPath);
+    
+    this.process = cpSpawn(resolvedPath, this.config.args || ['acp'], {
       env: { ...process.env, ...this.config.envVars },
       stdio: ['pipe', 'pipe', 'pipe'],
     });
@@ -136,6 +138,65 @@ export class LifecycleManager {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = null;
     }
+  }
+
+  private resolveBinaryPath(binPath: string): string {
+    // If it's already an absolute path, return as-is
+    if (binPath.startsWith('/') || binPath.includes(':\\')) {
+      return binPath;
+    }
+
+    // Try to resolve from PATH using which (Unix) or where (Windows)
+    // Use shell: true to ensure we get the user's full PATH from their shell config
+    try {
+      const command = process.platform === 'win32' ? 'where' : 'which';
+      const result = spawnSync(command, [binPath], { 
+        encoding: 'utf-8',
+        shell: true,
+        stdio: ['pipe', 'pipe', 'pipe']
+      });
+      
+      if (result.status === 0 && result.stdout) {
+        const resolved = result.stdout.trim();
+        if (resolved) {
+          const fullPath = resolved.split('\n')[0]; // Take first result if multiple
+          this.emit('log', { level: 'info', data: `Resolved ${binPath} to ${fullPath}` });
+          return fullPath;
+        }
+      } else {
+        this.emit('log', { level: 'warn', data: `which/where failed with status ${result.status}` });
+      }
+    } catch (error) {
+      this.emit('log', { level: 'warn', data: `which/where threw error: ${error}` });
+    }
+
+    // Fallback: check common installation paths
+    const homeDir = process.env.HOME || process.env.USERPROFILE || '';
+    const commonPaths = [
+      `${homeDir}/.opencode/bin`,
+      `${homeDir}/.local/bin`,
+      '/usr/local/bin',
+      '/usr/bin',
+    ];
+
+    for (const dir of commonPaths) {
+      const fullPath = `${dir}/${binPath}`;
+      try {
+        const result = spawnSync('test', ['-f', fullPath], { 
+          encoding: 'utf-8',
+          stdio: ['pipe', 'pipe', 'pipe']
+        });
+        if (result.status === 0) {
+          this.emit('log', { level: 'info', data: `Found ${binPath} at ${fullPath}` });
+          return fullPath;
+        }
+      } catch (error) {
+        // Continue to next path
+      }
+    }
+
+    this.emit('log', { level: 'warn', data: `Could not resolve ${binPath}, using as-is` });
+    return binPath;
   }
 
   private emit(event: string, data: any): void {
